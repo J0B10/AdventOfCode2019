@@ -1,7 +1,5 @@
 package de.ungefroren.adventofcode.y2019.day01
 
-import de.ungefroren.adventofcode.y2019.day01.Day01B.getClass
-
 import scala.io.Source
 
 object Day01A {
