@@ -22,6 +22,8 @@ object Day03A {
         false
       }
     }
+
+    def manhattanDistance(point: Point): Int = math.abs(x - point.x) + math.abs(y - point.y)
   }
 
   case class WireStrip(start: Point, end: Point) {
@@ -80,6 +82,6 @@ object Day03A {
     println(wire2_strips)
     val intersections = wire1_strips.flatMap(strip1 => wire2_strips.flatMap(strip2 => strip2.intersection(strip1)))
     println(intersections)
-    println(s"Distance: ${intersections.map(p => math.abs(p.x) + math.abs(p.y)).min}")
+    println(s"Distance: ${intersections.map(Point(0, 0).manhattanDistance(_)).min}")
   }
 }
