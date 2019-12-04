@@ -73,15 +73,19 @@ object Day03A {
   }
 
   def main(args: Array[String]): Unit = {
+    Visualization.canvasSize(20000, 20000)
     val lines = input.getLines().filterNot(_.matches("\\s*")).toList
     val wire1 = lines.head.split(",")
     val wire2 = lines(1).split(",")
     val wire1_strips = followWire(wire1)
+    wire1_strips.map(strip => ((strip.start.x, strip.start.y), (strip.end.x, strip.end.y))).foreach(Visualization.wire1)
     println(wire1_strips)
     val wire2_strips = followWire(wire2)
+    wire2_strips.map(strip => ((strip.start.x, strip.start.y), (strip.end.x, strip.end.y))).foreach(Visualization.wire2)
     println(wire2_strips)
     val intersections = wire1_strips.flatMap(strip1 => wire2_strips.flatMap(strip2 => strip2.intersection(strip1)))
     println(intersections)
     println(s"Distance: ${intersections.map(Point(0, 0).manhattanDistance(_)).min}")
+    Visualization.display()
   }
 }
