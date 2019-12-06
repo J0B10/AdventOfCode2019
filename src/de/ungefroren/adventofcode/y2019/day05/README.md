@@ -93,4 +93,4 @@ This time, when the TEST diagnostic program runs its input instruction to get th
 
 What is the diagnostic code for system ID 5?
 ```
-_See: https://adventofcode.com/2019/day/3_
+_See: https://adventofcode.com/2019/day/5_
