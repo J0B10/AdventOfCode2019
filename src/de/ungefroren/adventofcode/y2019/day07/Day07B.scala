@@ -5,7 +5,7 @@ import java.io.{File, InputStream}
 import scala.annotation.tailrec
 import scala.io.{Source, StdIn}
 
-//This is not very clean, I just hacked my existing intcode computer to stop whenever a input is required or a output is given
+//This is not very clean, I just hacked my existing intcode computer to stop whenever a input is required
 object Day07B {
 
   val input = Source.fromInputStream(getClass.getResourceAsStream("puzzle_input.txt"))
