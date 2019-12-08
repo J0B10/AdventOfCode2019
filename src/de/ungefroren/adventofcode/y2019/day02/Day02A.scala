@@ -11,8 +11,7 @@ object Day02A {
 
 
   def main(args: Array[String]): Unit = {
-    val intcode = input.mkString.split(",").map(_.replaceAll("\\s", "")).map(_.toInt)
-    val computer = new IntcodeComputer(intcode)
+    val computer = IntcodeComputer(input)
     computer.memory(1) = 12
     computer.memory(2) = 2
     computer.run()

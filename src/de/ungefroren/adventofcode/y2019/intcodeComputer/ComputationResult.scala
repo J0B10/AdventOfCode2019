@@ -17,8 +17,7 @@ object ComputationResult {
   /**
    * Instruction requires the computer to stop executing the program and wait for resuming
    *
-   * Some Output is provided
-   *
+   * @param output some output that was provided by the last operation
    */
   case class HALT_OUTPUT_PROVIDED[T: TypeTag](output: T) extends HALT()
 
@@ -36,5 +35,12 @@ object ComputationResult {
    * Just continue executing with the next instruction
    */
   object CONTINUE_EXECUTION extends ComputationResult()
+
+  /**
+   * Continue executing at a specific position
+   *
+   * @param instruction_pointer the position where th program should jump to
+   */
+  case class JUMPTO(instruction_pointer: Int) extends ComputationResult()
 
 }

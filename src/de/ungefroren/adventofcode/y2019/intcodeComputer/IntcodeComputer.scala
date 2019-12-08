@@ -1,6 +1,7 @@
 package de.ungefroren.adventofcode.y2019.intcodeComputer
 
 import scala.annotation.tailrec
+import scala.io.Source
 
 /**
  * A intcode computer runs a program that is defined only by integers.
@@ -16,7 +17,7 @@ import scala.annotation.tailrec
  *               Import `instructions.defaults` to use the default set of instructions for your computer
  *               or define your own ones
  */
-class IntcodeComputer(var memory: Array[Int])(implicit instructions: Seq[Instruction]) {
+class IntcodeComputer(var memory: Array[Int])(instructions: Seq[Instruction]) {
 
   private val instruction_map = instructions.groupBy(_.opcode).transform({
     case (_, instructions) if instructions.size == 1 => instructions.head
@@ -44,11 +45,14 @@ class IntcodeComputer(var memory: Array[Int])(implicit instructions: Seq[Instruc
     val op = memory(instruction_pointer) % 100
     instruction_map get op match {
       case Some(instruction) =>
-        val parameters = (1 to instruction.aop).map(param).toSeq
+        val parameters = (0 until instruction.aop).map(param)
         _lastResult = Some(instruction.execute(parameters, this))
         lastResult match {
           case ComputationResult.CONTINUE_EXECUTION =>
             instruction_pointer += instruction.aop + 1
+            run()
+          case ComputationResult.JUMPTO(i) =>
+            instruction_pointer = i
             run()
           case _ => lastResult
         }
@@ -84,7 +88,6 @@ class IntcodeComputer(var memory: Array[Int])(implicit instructions: Seq[Instruc
   private final def parameterMode(parameter: Int): Int = {
     val opcode = memory(instruction_pointer)
     (opcode / math.pow(10, parameter + 2).toInt) % 10
-    memory.min
   }
 
   /**
@@ -95,9 +98,17 @@ class IntcodeComputer(var memory: Array[Int])(implicit instructions: Seq[Instruc
    */
   private final def param(index: Int): Int = {
     parameterMode(index) match {
-      case 0 => memory(instruction_pointer + index)
-      case 1 => instruction_pointer + index
+      case 0 => memory(instruction_pointer + index + 1)
+      case 1 => instruction_pointer + index + 1
       case mode => throw new Exception(s"Unknown parameter mode at $instruction_pointer for parameter $index: $mode")
     }
   }
+}
+
+object IntcodeComputer {
+  def apply(memory: Array[Int])(implicit instructions: Seq[Instruction]): IntcodeComputer =
+    new IntcodeComputer(memory)(instructions)
+
+  def apply(source: Source)(implicit instructions: Seq[Instruction]): IntcodeComputer =
+    new IntcodeComputer(source.mkString.replaceAll("\\s", "").split(",").map(_.toInt))(instructions)
 }

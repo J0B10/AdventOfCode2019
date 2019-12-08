@@ -15,7 +15,7 @@ object Day02B {
     val intcode = input.mkString.split(",").map(_.replaceAll("\\s", "")).map(_.toInt)
     for (noun <- 0 to 99) {
       for (verb <- 0 to 99) {
-        val computer = new IntcodeComputer(intcode.clone)
+        val computer = IntcodeComputer(intcode.clone)
         computer.memory(1) = noun
         computer.memory(2) = verb
         computer.run()
