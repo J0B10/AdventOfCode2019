@@ -5,7 +5,7 @@ import de.ungefroren.adventofcode.y2019.intcodeComputer.instructions.defaults
 
 import scala.io.Source
 
-object Day05A {
+object Day05 {
 
   val input = Source.fromInputStream(getClass.getResourceAsStream("puzzle_input.txt"))
 
