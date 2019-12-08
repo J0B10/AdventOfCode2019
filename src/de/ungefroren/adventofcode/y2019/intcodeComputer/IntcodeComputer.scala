@@ -1,7 +1,5 @@
 package de.ungefroren.adventofcode.y2019.intcodeComputer
 
-import de.ungefroren.adventofcode.y2019.intcodeComputer.instructions._
-
 import scala.annotation.tailrec
 
 /**
@@ -18,7 +16,12 @@ import scala.annotation.tailrec
  *               Import `instructions.defaults` to use the default set of instructions for your computer
  *               or define your own ones
  */
-class IntcodeComputer(var memory: Array[Int])(implicit val instructions: Seq[Instruction]) {
+class IntcodeComputer(var memory: Array[Int])(implicit instructions: Seq[Instruction]) {
+
+  private val instruction_map = instructions.groupBy(_.opcode).transform({
+    case (_, instructions) if instructions.size == 1 => instructions.head
+    case _ => throw new Exception("Each instructions opcode must be unique!")
+  })
 
   /**
    * The address of the instruction inside the memory where the computer should proceed executing once `run()` is called
@@ -39,7 +42,7 @@ class IntcodeComputer(var memory: Array[Int])(implicit val instructions: Seq[Ins
   @tailrec
   final def run(): ComputationResult = {
     val op = memory(instruction_pointer) % 100
-    instructions find (_.opcode == op) match {
+    instruction_map get op match {
       case Some(instruction) =>
         val parameters = (1 to instruction.aop).map(param).toSeq
         _lastResult = Some(instruction.execute(parameters, this))
@@ -50,6 +53,20 @@ class IntcodeComputer(var memory: Array[Int])(implicit val instructions: Seq[Ins
           case _ => lastResult
         }
       case _ => throw new Exception(s"Invalid opcode at $instruction_pointer: No instruction with opcode $op supported.")
+    }
+  }
+
+  /**
+   * A parameters must be in position mode if you want to write to its position in the memory.
+   *
+   * This method checks for it and throws an exception otherwise
+   *
+   * @param index the number of the parameter
+   */
+  private[intcodeComputer] final def checkWrite(index: Int): Unit = {
+    parameterMode(index) match {
+      case 0 => //Parameter in position mode, do nothing
+      case mode => throw new Exception(s"Can't write to parameter $index at position $instruction_pointer: Parameter mode is $mode")
     }
   }
 
@@ -68,20 +85,6 @@ class IntcodeComputer(var memory: Array[Int])(implicit val instructions: Seq[Ins
     val opcode = memory(instruction_pointer)
     (opcode / math.pow(10, parameter + 2).toInt) % 10
     memory.min
-  }
-
-  /**
-   * A parameters must be in position mode if you want to write to its position in the memory.
-   *
-   * This method checks for it and throws an exception otherwise
-   *
-   * @param index the number of the parameter
-   */
-  private[intcodeComputer] final def checkWrite(index: Int): Unit = {
-    parameterMode(index) match {
-      case 0 => //Parameter in position mode, do nothing
-      case mode => throw new Exception(s"Can't write to parameter $index at position $instruction_pointer: Parameter mode is $mode")
-    }
   }
 
   /**

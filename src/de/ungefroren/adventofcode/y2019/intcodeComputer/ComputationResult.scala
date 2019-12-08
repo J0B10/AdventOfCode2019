@@ -10,19 +10,9 @@ sealed abstract class ComputationResult()
 object ComputationResult {
 
   /**
-   * Program was executed successfully and will now exit
-   */
-  object EXIT_SUCCESSFUL extends ComputationResult()
-
-  /**
    * Instruction requires the computer to stop executing the program and wait for something
    */
   sealed abstract class HALT() extends ComputationResult()
-
-  /**
-   * Instruction requires the computer to stop executing the program and wait for input
-   */
-  object HALT_WAITING_FOR_INPUT extends HALT()
 
   /**
    * Instruction requires the computer to stop executing the program and wait for resuming
@@ -31,6 +21,16 @@ object ComputationResult {
    *
    */
   case class HALT_OUTPUT_PROVIDED[T: TypeTag](output: T) extends HALT()
+
+  /**
+   * Program was executed successfully and will now exit
+   */
+  object EXIT_SUCCESSFUL extends ComputationResult()
+
+  /**
+   * Instruction requires the computer to stop executing the program and wait for input
+   */
+  object HALT_WAITING_FOR_INPUT extends HALT()
 
   /**
    * Just continue executing with the next instruction
