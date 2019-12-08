@@ -17,7 +17,7 @@ import scala.io.Source
  *               Import `instructions.defaults` to use the default set of instructions for your computer
  *               or define your own ones
  */
-class IntcodeComputer(var memory: Array[Int])(instructions: Seq[Instruction]) {
+class IntcodeComputer(var memory: Array[Int])(instructions: Set[Instruction]) {
 
   private val instruction_map = instructions.groupBy(_.opcode).transform({
     case (_, instructions) if instructions.size == 1 => instructions.head
@@ -40,6 +40,11 @@ class IntcodeComputer(var memory: Array[Int])(instructions: Seq[Instruction]) {
    */
   def lastResult: ComputationResult = _lastResult.get
 
+  /**
+   * Execute the program defined in this computers memory starting at `instruction_pointer`
+   *
+   * @return the result with which the program stopped
+   */
   @tailrec
   final def run(): ComputationResult = {
     val op = memory(instruction_pointer) % 100
@@ -59,6 +64,50 @@ class IntcodeComputer(var memory: Array[Int])(instructions: Seq[Instruction]) {
       case _ => throw new Exception(s"Invalid opcode at $instruction_pointer: No instruction with opcode $op supported.")
     }
   }
+
+  /**
+   * Resume a program that is in HALT state (last Computation Result was `HALT`)
+   *
+   * @param input some optional input, required if the program stopped with `HALT_WAITING_FOR_INPUT`
+   * @return the result with which the program stopped
+   */
+  final def resume(input: Option[Int]): ComputationResult = {
+    val op = memory(instruction_pointer) % 100
+    instruction_map get op match {
+      case Some(instruction) =>
+        instruction match {
+          case resumable: Resumable =>
+            val parameters = (0 until instruction.aop).map(param)
+            _lastResult = Some(resumable.resume(input, parameters, this))
+            lastResult match {
+              case ComputationResult.CONTINUE_EXECUTION =>
+                instruction_pointer += instruction.aop + 1
+                run()
+              case ComputationResult.JUMPTO(i) =>
+                instruction_pointer = i
+                run()
+              case _ => lastResult
+            }
+          case _ => throw new Exception("Last instruction isn't resumable")
+        }
+      case _ => throw new Exception(s"Invalid opcode at $instruction_pointer: No instruction with opcode $op supported.")
+    }
+  }
+
+  /**
+   * Resume a program that stopped returning `HALT_WAITING_FOR_INPUT` and provide an input
+   *
+   * @param input with which the program should continue
+   * @return the result with which the program stopped
+   */
+  final def resume(input: Int): ComputationResult = resume(Some(input))
+
+  /**
+   * Resume a program that stopped returning `HALT_OUTPUT_PROVIDED`
+   *
+   * @return the result with which the program stopped
+   */
+  final def resume(): ComputationResult = resume(None)
 
   /**
    * A parameters must be in position mode if you want to write to its position in the memory.
@@ -106,9 +155,9 @@ class IntcodeComputer(var memory: Array[Int])(instructions: Seq[Instruction]) {
 }
 
 object IntcodeComputer {
-  def apply(memory: Array[Int])(implicit instructions: Seq[Instruction]): IntcodeComputer =
+  def apply(memory: Array[Int])(implicit instructions: Set[Instruction]): IntcodeComputer =
     new IntcodeComputer(memory)(instructions)
 
-  def apply(source: Source)(implicit instructions: Seq[Instruction]): IntcodeComputer =
+  def apply(source: Source)(implicit instructions: Set[Instruction]): IntcodeComputer =
     new IntcodeComputer(source.mkString.replaceAll("\\s", "").split(",").map(_.toInt))(instructions)
 }

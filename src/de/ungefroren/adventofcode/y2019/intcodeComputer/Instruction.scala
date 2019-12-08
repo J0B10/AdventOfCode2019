@@ -15,6 +15,7 @@ abstract class Instruction(val opcode: Int, val aop: Int) {
    *
    * @param param    the positions in the memory where the parameters are stored
    * @param computer the intcode computer that performs this operation
+   * @return the result of this computation
    */
   def execute(param: Seq[Int], computer: IntcodeComputer): ComputationResult
 

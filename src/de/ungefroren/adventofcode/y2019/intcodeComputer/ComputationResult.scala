@@ -19,7 +19,7 @@ object ComputationResult {
    *
    * @param output some output that was provided by the last operation
    */
-  case class HALT_OUTPUT_PROVIDED[T: TypeTag](output: T) extends HALT()
+  case class HALT_OUTPUT_PROVIDED(output: Int) extends HALT()
 
   /**
    * Program was executed successfully and will now exit
