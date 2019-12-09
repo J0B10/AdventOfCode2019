@@ -6,7 +6,7 @@ import scala.io.Source
 /**
  * A intcode computer runs a program that is defined only by integers.
  *
- * @param memory The memory contains the instructions for the program and space for variables.
+ * @param _memory The memory contains the instructions for the program and space for variables.
  *               It is altered by the computer while the program runs.
  *
  *               '''Attention:'''
@@ -17,12 +17,14 @@ import scala.io.Source
  *               Import `instructions.defaults` to use the default set of instructions for your computer
  *               or define your own ones
  */
-class IntcodeComputer(var memory: Array[Int])(instructions: Set[Instruction]) {
+class IntcodeComputer(_memory: Array[Long])(instructions: Set[Instruction]) {
 
   private val instruction_map = instructions.groupBy(_.opcode).transform({
     case (_, instructions) if instructions.size == 1 => instructions.head
     case _ => throw new Exception("Each instructions opcode must be unique!")
   })
+
+  val memory: Memory = Memory(_memory)
 
   /**
    * The address of the instruction inside the memory where the computer should proceed executing once `run()` is called
@@ -32,6 +34,11 @@ class IntcodeComputer(var memory: Array[Int])(instructions: Set[Instruction]) {
    * It could introduce unintended behaviour.
    */
   var instruction_pointer = 0
+
+  /**
+   * Relative base where to start counting if in relative parameter mode
+   */
+  private[intcodeComputer] var relative_base = 0
 
   private var _lastResult: Option[ComputationResult] = None
 
@@ -47,7 +54,7 @@ class IntcodeComputer(var memory: Array[Int])(instructions: Set[Instruction]) {
    */
   @tailrec
   final def run(): ComputationResult = {
-    val op = memory(instruction_pointer) % 100
+    val op = (memory(instruction_pointer) % 100).toInt
     instruction_map get op match {
       case Some(instruction) =>
         val parameters = (0 until instruction.aop).map(param)
@@ -72,7 +79,7 @@ class IntcodeComputer(var memory: Array[Int])(instructions: Set[Instruction]) {
    * @return the result with which the program stopped
    */
   final def resume(input: Option[Int]): ComputationResult = {
-    val op = memory(instruction_pointer) % 100
+    val op = (memory(instruction_pointer) % 100).toInt
     instruction_map get op match {
       case Some(instruction) =>
         instruction match {
@@ -119,6 +126,7 @@ class IntcodeComputer(var memory: Array[Int])(instructions: Set[Instruction]) {
   private[intcodeComputer] final def checkWrite(index: Int): Unit = {
     parameterMode(index) match {
       case 0 => //Parameter in position mode, do nothing
+      case 2 => //Parameter in relative mode, do nothing
       case mode => throw new Exception(s"Can't write to parameter $index at position $instruction_pointer: Parameter mode is $mode")
     }
   }
@@ -135,7 +143,7 @@ class IntcodeComputer(var memory: Array[Int])(instructions: Set[Instruction]) {
    * @return the mode for the given parameter
    */
   private final def parameterMode(parameter: Int): Int = {
-    val opcode = memory(instruction_pointer)
+    val opcode = memory(instruction_pointer).toInt
     (opcode / math.pow(10, parameter + 2).toInt) % 10
   }
 
@@ -147,8 +155,9 @@ class IntcodeComputer(var memory: Array[Int])(instructions: Set[Instruction]) {
    */
   private final def param(index: Int): Int = {
     parameterMode(index) match {
-      case 0 => memory(instruction_pointer + index + 1)
+      case 0 => memory(instruction_pointer + index + 1).toInt
       case 1 => instruction_pointer + index + 1
+      case 2 => relative_base + memory(instruction_pointer + index + 1).toInt
       case mode => throw new Exception(s"Unknown parameter mode at $instruction_pointer for parameter $index: $mode")
     }
   }
@@ -156,6 +165,9 @@ class IntcodeComputer(var memory: Array[Int])(instructions: Set[Instruction]) {
 
 object IntcodeComputer {
   def apply(memory: Array[Int])(implicit instructions: Set[Instruction]): IntcodeComputer =
+    new IntcodeComputer(memory.map(_.toLong))(instructions)
+
+  def apply(memory: Array[Long])(implicit instructions: Set[Instruction]): IntcodeComputer =
     new IntcodeComputer(memory)(instructions)
 
   def apply(source: Source)(implicit instructions: Set[Instruction]): IntcodeComputer =

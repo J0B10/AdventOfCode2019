@@ -11,9 +11,10 @@ object Day02A {
 
 
   def main(args: Array[String]): Unit = {
-    val computer = IntcodeComputer(input)
-    computer.memory(1) = 12
-    computer.memory(2) = 2
+    val intcode = input.mkString.replaceAll("\\s", "").split(",").map(_.toInt)
+    intcode(1) = 12
+    intcode(2) = 2
+    val computer = IntcodeComputer(intcode)
     computer.run()
     val result = computer.memory(0)
     print(s"Value at position 0 is: $result")

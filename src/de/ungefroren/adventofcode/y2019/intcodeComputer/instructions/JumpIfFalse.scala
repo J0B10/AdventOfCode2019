@@ -9,7 +9,7 @@ object JumpIfFalse extends Instruction(6,2) {
 
   override def execute(param: Seq[Int], computer: IntcodeComputer): ComputationResult = {
     if (computer.memory(param.head) == 0) {
-      ComputationResult.JUMPTO(computer.memory(param(1)))
+      ComputationResult.JUMPTO(computer.memory(param(1)).toInt)
     } else {
       ComputationResult.CONTINUE_EXECUTION
     }

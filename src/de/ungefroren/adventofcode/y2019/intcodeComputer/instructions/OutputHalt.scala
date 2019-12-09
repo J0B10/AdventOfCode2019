@@ -13,5 +13,5 @@ object OutputHalt extends Output with Resumable {
     ComputationResult.CONTINUE_EXECUTION
 
   override def execute(param: Seq[Int], computer: IntcodeComputer): ComputationResult =
-    ComputationResult.HALT_OUTPUT_PROVIDED(computer.memory(param.head))
+    ComputationResult.HALT_OUTPUT_PROVIDED(computer.memory(param.head).toInt)
 }

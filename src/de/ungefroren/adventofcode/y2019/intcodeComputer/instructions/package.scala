@@ -11,6 +11,7 @@ package object instructions {
     JumpIfFalse,
     LessThan,
     Equals,
+    AdjustRelativeBase,
     Exit
   )
 }

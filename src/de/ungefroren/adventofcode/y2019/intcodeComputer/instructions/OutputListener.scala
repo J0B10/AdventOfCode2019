@@ -10,7 +10,7 @@ import de.ungefroren.adventofcode.y2019.intcodeComputer.{ComputationResult, Intc
 case class OutputListener(onOutput: Int => Unit) extends Output {
 
   final override def execute(param: Seq[Int], computer: IntcodeComputer): ComputationResult = {
-    onOutput(computer.memory(param.head))
+    onOutput(computer.memory(param.head).toInt)
     ComputationResult.CONTINUE_EXECUTION
   }
 }
