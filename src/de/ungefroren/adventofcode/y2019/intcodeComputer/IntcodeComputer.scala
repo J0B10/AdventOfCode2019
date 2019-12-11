@@ -171,5 +171,5 @@ object IntcodeComputer {
     new IntcodeComputer(memory)(instructions)
 
   def apply(source: Source)(implicit instructions: Set[Instruction]): IntcodeComputer =
-    new IntcodeComputer(source.mkString.replaceAll("\\s", "").split(",").map(_.toInt))(instructions)
+    new IntcodeComputer(source.mkString.replaceAll("\\s", "").split(",").map(_.toLong))(instructions)
 }
